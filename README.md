@@ -18,3 +18,38 @@ need to select it from FoxyProxy's list.
 	![burp_suite_certificate](./images/burp_suite_certificate.png)
 
 	![import_certificate](./images/import_certificate.png)
+
+6. To run the vulnerable web application we will need to install node.js and npm
+
+## Exploit:
+1. Run the vulnerable web application:
+```
+$ cd app
+$ npm install
+$ export APPID=1111 && node index.js
+```
+The web page should look as follows:
+	![app_web_page](./images/app_web_page.png)
+
+2. Start Burp Suite and also select it as a proxy from FoxyProxy's list.
+
+3. Go into `Proxy` -> `HTTP history` tab and select the GET request for our vulnerable app.
+Right Click on it and select the `Get Headers Option`.
+Now we will use Param Miner to get the unkeyed inputs:
+
+	![get_headers](./images/get_headers.png)
+
+4. Param Miner will give us all the unkeyed parameters from the header. After
+inspecting the GET responses we find the vulnerability:
+
+	![unkeyed_header](./images/unkeyed_header.png)
+
+5. All we have left to do is to acctually run the attack. In the `Proxy` -> `HTTP History` select the GET request.
+Right Click on it and select `Send it to repeater`.
+Add the following line at the end of the request:
+ ```
+ x-forwarded-for: alert("vulnerability found")
+ ```
+Send the crafted request and refresh the web page of the app.
+The result:
+	![vulnerability_found](./images/vulnerability_found.png)
